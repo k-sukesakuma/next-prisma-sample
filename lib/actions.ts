@@ -1,9 +1,24 @@
 'use server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { z } from 'zod';
+
+const schema = z.object({
+  name: z.string().min(2),
+});
 
 export const addTodo = async (prevState: any, data: FormData) => {
   const name = data.get('name') as string;
+  const validatedFields = schema.safeParse({
+    name,
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
+  }
+
   try {
     await prisma.todo.create({ data: { name } });
   } catch (e) {
