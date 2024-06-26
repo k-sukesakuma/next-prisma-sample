@@ -1,22 +1,19 @@
 import prisma from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
+import { addTodo } from '@/lib/actions';
+import DeleteButton from '@/components/delete-button';
 
 const Page = async () => {
   const todos = await prisma.todo.findMany();
-
-  const addTodo = async (data: FormData) => {
-    'use server';
-    const name = data.get('name') as string;
-    await prisma.todo.create({ data: { name } });
-    revalidatePath('/todos');
-  };
 
   return (
     <div className="m-8">
       <h1 className="text-xl font-bold">Todo一覧</h1>
       <ul className="mt-8">
         {todos.map((todo) => (
-          <li key={todo.id}>{todo.name}</li>
+        <li key={todo.id} className="flex items-center space-x-2">
+            <span>{todo.name}</span>
+            <DeleteButton id={todo.id} />
+        </li>
         ))}
       </ul>
       <form className="flex items-center mt-4" action={addTodo}>
